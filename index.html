@@ -1,14 +1,41 @@
 <!DOCTYPE html>
 <head>
-<!--
-      <link rel="stylesheet" href="http://libs.cartocdn.com/cartodb.js/v3/themes/css/cartodb.css" />
-    <script src="https://maps.googleapis.com/maps/api/js?sensor=false&v=3.8"></script>
-    <script src="http://libs.cartocdn.com/cartodb.js/v3/cartodb.js"></script>
-      <script src="js/l.geosearch.mod.js"></script>
-  <script src="js/leaflet-hash.js"></script>
--->
-
-        <link rel="stylesheet" href="http://libs.cartocdn.com/cartodb.js/v3/3.11/themes/css/cartodb.css" />
+    <style>
+      html, body {width:100%; height:100%; padding: 0; margin: 0;}
+      #map {width: 100%; /*height:100%;*/ position: absolute; top: 0px; bottom: 0px; background: black; z-index:99;}
+       
+           #layer_selector {
+        position: absolute;
+        bottom: 20px;
+        left: 20px;
+        padding: 0;
+      }
+ 
+      #layer_selector ul {
+        padding: 0; margin: 0;
+        list-style-type: none;
+      }
+ 
+      #layer_selector li {
+        border-bottom: 1px solid #999;
+        padding: 15px 30px;
+        font-family: "Helvetica", Arial;
+        font-size: 13px;
+        color: #444;
+        cursor: auto;
+      }
+ 
+      #layer_selector li:hover {
+        background-color: #F0F0F0;
+        cursor: pointer;
+      }
+ 
+      #layer_selector li.selected {
+        background-color: #EEE;
+      }
+      div.cartodb-popup div.cartodb-popup-content {max-height:none | inherit}
+    </style>
+    <link rel="stylesheet" href="http://libs.cartocdn.com/cartodb.js/v3/3.11/themes/css/cartodb.css" />
     <!--[if lte IE 8]>
     <link rel="stylesheet" href="http://libs.cartocdn.com/cartodb.js/v2/themes/css/cartodb.ie.css" />
     <![endif]-->
@@ -17,60 +44,113 @@
   <script src="http://libs.cartocdn.com/cartodb.js/v3/3.11/cartodb.js"></script>
   <script src="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/js/bootstrap.min.js"></script>
   <script src="js/leaflet-hash.js"></script>
-    <script src="js/l.geosearch.mod.js"></script>
-
-
-     <style>
-      html, body {
-        height: 100%;
-        padding: 0;
-        margin: 0;
-      }
-    #map {
-        width: 100%; /*height:100%;*/ position: absolute; top: 0px; bottom: 0px; background: black; z-index:1;}
-
-    </style>
+  <script src="js/l.geosearch.mod.js">  </script>
+        <script src="js/bing.js"></script>
+    <script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>
+    
     </head>
  
 <body>
     <div id="map"></div>  
+      <div id="layer_selector" class="cartodb-infobox">
+      <ul>
+        <li id="streets" class="selected">Streets</li>
+        <li id="sat">Satellite</li>
+    
+      </ul>
+    </div>
+    <script src="http://libs.cartocdn.com/cartodb.js/v3/3.11/cartodb.js"></script>
     <script>
-        
 
+
+window.onload = function initialize() {
         
-window.onload = function main() {
-  cartodb.createVis('map', 'http://zenontc.cartodb.com/api/v2/viz/3dcc33be-62de-11e4-b17b-0e9d821ea90d/viz.json', {
+selectedStyle = $('li.selected').attr('id');
+//    var satellite = new URL("http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}";
+
+
+cartodb.createVis('map', 'http://zenontc.cartodb.com/api/v2/viz/3dcc33be-62de-11e4-b17b-0e9d821ea90d/viz.json', {
       //add CartoDB geocoder
-search: true
+//search: true
+//        shareable: true,
+            tiles_loader: true
   })
+  
   .done(function (vis, layers) {
-      //get native leaflet map for basemap selector tool
-      map = vis.getNativeMap();
+      //get native leaflet map for basemap selector tool//WORKS BUT CANNOT ADD LEAFLET LAYER CONTROLLER
+      
+      var map = vis.getNativeMap();
       console.log(map);
+      
+//   Perform control operations on L.Map object //WORKS
+     map.setZoom(12);
+//     map.panTo([50.5, 30.5]);
+    
+// log basemap to push new tiles//WORKS
+    
+      var basemap = layers[0];
+      console.log(basemap);
+    
+//test setUrl // WORKS
+//var changetoSAT = basemap.setUrl('http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}');
+    
+       
+    
+//CREATE SELECTOR FOR TOGGLING BETWEEN BASEMAPS using CartoDB.js
+    
+    createSelector(map);
+    
+      function createSelector(layers) {
+//        var sql = new cartodb.SQL({ user: 'zenontc' });
+
+        var $options = $('#layer_selector li');
+        $options.click(function(e) {
+          // get the area of the selected layer
+          var $li = $(e.target);
+          var id = $li.attr('id');
+          if(id == 'sat' ){
+            // change the basemap url in the layer[0] to toggle to sat img
+            // MUST APPLY SELECTED STYLE TO "SATTELITE BUTTON", push style in click event?
+console.log("satellite layer selected");
+var changetoSat = basemap.setUrl('http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}');
+ selectedStyle = id;
+          };
+            
+            if(id == 'streets' ){
+            // change the basemap url in the layer[0] to toggle back to mapbox 
+console.log("streets layer selected");
+var changetoStreets = basemap.setUrl("https://a.tiles.mapbox.com/v3/zenontc.jgai4mkg/{z}/{x}/{y}.png");
+            selectedStyle = id;
+          }
+            
+        });
+      }
+      
   })
   .error(function (err) {
                 console.log(err);
             });
+
 }
 
 
-//  TESTING  // GOOOGLE GEOCODER PARAMETERS
-//    
-//    function getURLParameter(name) {
-//       return decodeURI(
-//       (RegExp(name + '=' + '(.+?)(&|$)').exec(location.search) || [, ])[1]);
-//    }
-//    
-//    var regionParameter = getURLParameter('region');
-//    var region = (regionParameter === 'undefined') ? '' : regionParameter;
 
-// GOOGLE GEOCODER CONTROLS
-//       new L.Control.GeoSearch({
-//           provider: new L.GeoSearch.Provider.Google({
-//               region: region
-//           })
-//       }).addTo(map);
         
         </script>
+<!--
+    <script>
+   //  TESTING  // GOOOGLE GEOCODER PARAMETERS
+    
+    function getURLParameter(name) {
+       return decodeURI(
+       (RegExp(name + '=' + '(.+?)(&|$)').exec(location.search) || [, ])[1]);
+    }
+    
+    var regionParameter = getURLParameter('region');
+    var region = (regionParameter === 'undefined') ? '' : regionParameter;
+         
+        var map;
+        
+    </script>
+-->
 </body>
-
