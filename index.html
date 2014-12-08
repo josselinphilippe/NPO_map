@@ -130,6 +130,8 @@ cartodb.createVis('map', 'http://zenontc.cartodb.com/api/v2/viz/3dcc33be-62de-11
             // MUST APPLY SELECTED STYLE TO "SATTELITE BUTTON", push style in click event?
 console.log("satellite layer selected");
 var changetoSat = basemap.setUrl('http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}');
+              map.setZoom(14);
+
  selectedStyle = id;
           };
             
