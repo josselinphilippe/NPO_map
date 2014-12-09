@@ -86,20 +86,7 @@
 
 window.onload = function initialize() {
         
-//    set GEOCODER PARAMETERS
     
-    function getURLParameter(name) {
-       return decodeURI(
-       (RegExp(name + '=' + '(.+?)(&|$)').exec(location.search) || [, ])[1]);
-    }
-    
-    var regionParameter = getURLParameter('region');
-    var region = (regionParameter === 'undefined') ? '' : regionParameter;
-    console.log(region);
-    
-    
-
-
 cartodb.createVis('map', 'http://zenontc.cartodb.com/api/v2/viz/3dcc33be-62de-11e4-b17b-0e9d821ea90d/viz.json', {
 //add CartoDB geocoder
 //        search: true,
@@ -109,7 +96,7 @@ cartodb.createVis('map', 'http://zenontc.cartodb.com/api/v2/viz/3dcc33be-62de-11
     cartodb_logo: false
   })
   
-  .done(function (vis, layers) {
+  .done(function (vis, layers, layer) {
 //get native leaflet map for basemap selector tool//WORKS BUT CANNOT ADD LEAFLET LAYER CONTROLLER
 var basemap = layers[0];
     var zoningmap = layers[1];
@@ -122,7 +109,7 @@ var basemap = layers[0];
        return decodeURI(
        (RegExp(name + '=' + '(.+?)(&|$)').exec(location.search) || [, ])[1]);
     }
-    
+//    set GEOCODER PARAMETERS    
     var regionParameter = getURLParameter('region');
     var region = (regionParameter === 'undefined') ? '' : regionParameter;
     console.log(region);
@@ -143,18 +130,16 @@ var mbAttr = 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</
 				'Imagery © <a href="http://mapbox.com">Mapbox</a>',
       mbUrl = 'https://{s}.tiles.mapbox.com/v3/{id}/{z}/{x}/{y}.png';
       
-// define various tile src
+// test setUrl with defined basemap layer
 //	    var satellite = basemap.setUrl('http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'),
 //        grayscale   = basemap.setUrl("https://a.tiles.mapbox.com/v3/zenontc.jgai4mkg/{z}/{x}/{y}.png");
-
+    
+// define various tile src
     	    var grayscale   = L.tileLayer(mbUrl, {id: 'zenontc.jgai4mkg', attribution: mbAttr}),     
-      satellite = L.tileLayer('http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+  satellite = L.tileLayer('http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
 	attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
 });
-//		    satellite  = L.tileLayer('http://oatile{s}.mqcdn.com/tiles/1.0.0/sat/{z}/{x}/{y}.jpg', {
-//	attribution: 'Tiles Courtesy of <a href="http://www.mapquest.com/">MapQuest</a> &mdash; Portions Courtesy NASA/JPL-Caltech and U.S. Depart. of Agriculture, Farm Service Agency',
-//	subdomains: '1234'
-//});
+
     
     var baseLayers = {
 			"Grayscale": grayscale,
