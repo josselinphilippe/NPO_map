@@ -4,9 +4,9 @@
       html, body {width:100%; height:100%; padding: 0; margin: 0;}
       #map {width: 100%; /*height:100%;*/ position: absolute; top: 0px; bottom: 0px; background: black; z-index:99;}
        
-                  #layer_selector {
+           #layer_selector {
         position: absolute;
-        bottom: 20px;
+        bottom: 50px;
         left: 20px;
         padding: 0;
       }
@@ -60,10 +60,11 @@
       <!--libraries kept to a minimum. Bootstrap could be used a la carte here, but I'm being lazy-->
   <script src="http://libs.cartocdn.com/cartodb.js/v3/3.11/cartodb.js"></script>
   <script src="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/js/bootstrap.min.js"></script>
-  <script src="js/leaflet-hash.js"></script>
+<!--  <script src="js/leaflet-hash.js"></script>-->
   <script src="js/l.geosearch.mod.js">  </script>
         <script src="js/bing.js"></script>
-    <script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>
+<!--    <script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>-->
+   
     
     </head>
  
@@ -71,10 +72,11 @@
     <div id="map"></div>  
       <div id="layer_selector" class="cartodb-infobox">
       <ul>
-        <li id="streets" class="selected">Streets</li>
-        <li id="sat">Satellite</li>
+        <li id="streets" class="streets">Streets</li>
+        <li id="sat" class="sat">Satellite</li>
     
       </ul>
+          <div id="geosearch"></div>
     </div>
     <script src="http://libs.cartocdn.com/cartodb.js/v3/3.11/cartodb.js"></script>
     <script>
@@ -82,31 +84,94 @@
 
 window.onload = function initialize() {
         
+//    set GEOCODER PARAMETERS
+    
+    function getURLParameter(name) {
+       return decodeURI(
+       (RegExp(name + '=' + '(.+?)(&|$)').exec(location.search) || [, ])[1]);
+    }
+    
+    var regionParameter = getURLParameter('region');
+    var region = (regionParameter === 'undefined') ? '' : regionParameter;
+    console.log(region);
+    
 selectedStyle = $('li.selected').attr('id');
-//    var satellite = new URL("http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}";
+    
 
 
 cartodb.createVis('map', 'http://zenontc.cartodb.com/api/v2/viz/3dcc33be-62de-11e4-b17b-0e9d821ea90d/viz.json', {
-      //add CartoDB geocoder
-//search: true
+//add CartoDB geocoder
+//        search: true,
+    
 //        shareable: true,
-            tiles_loader: true
+        tiles_loader: true,
+    cartodb_logo: false
   })
   
   .done(function (vis, layers) {
-      //get native leaflet map for basemap selector tool//WORKS BUT CANNOT ADD LEAFLET LAYER CONTROLLER
-      
-      var map = vis.getNativeMap();
-      console.log(map);
-      
-//   Perform control operations on L.Map object //WORKS
-     map.setZoom(12);
-//     map.panTo([50.5, 30.5]);
+//get native leaflet map for basemap selector tool//WORKS BUT CANNOT ADD LEAFLET LAYER CONTROLLER
+//var basemap = layers[0];
+//    console.log(basemap);
+    var map = vis.getNativeMap();
     
-// log basemap to push new tiles//WORKS
+       function getURLParameter(name) {
+       return decodeURI(
+       (RegExp(name + '=' + '(.+?)(&|$)').exec(location.search) || [, ])[1]);
+    }
     
-      var basemap = layers[0];
-      console.log(basemap);
+    var regionParameter = getURLParameter('region');
+    var region = (regionParameter === 'undefined') ? '' : regionParameter;
+    console.log(region);
+    
+//    GEOCODER CONTROLS
+       new L.Control.GeoSearch({
+           provider: new L.GeoSearch.Provider.Google({
+               region: region
+           }),
+           position: 'bottomleft'
+       }).addTo(map);
+    
+    
+// Leaflet BASEMAP LAYER SELECTOR /// does not push new tiles with createVis(), works with createLayer()
+      
+//var mbAttr = 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
+//				'<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
+//				'Imagery © <a href="http://mapbox.com">Mapbox</a>',
+//      mbUrl = 'https://{s}.tiles.mapbox.com/v3/{id}/{z}/{x}/{y}.png';
+//      
+//// define various satellite img options
+//      
+//	    var grayscale   = L.tileLayer(mbUrl, {id: 'zenontc.jgai4mkg', attribution: mbAttr}),
+////          satellite = new L.BingLayer('Ajio1n0EgmAAvT3zLndCpHrYR_LHJDgfDU6B0tV_1RClr7OFLzy4RnkLXlSdkJ_x');
+////           
+////      satellite = L.tileLayer('http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+////	attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+////});
+//		    satellite  = L.tileLayer('http://oatile{s}.mqcdn.com/tiles/1.0.0/sat/{z}/{x}/{y}.jpg', {
+//	attribution: 'Tiles Courtesy of <a href="http://www.mapquest.com/">MapQuest</a> &mdash; Portions Courtesy NASA/JPL-Caltech and U.S. Depart. of Agriculture, Farm Service Agency',
+//	subdomains: '1234'
+//});
+//    
+//    var baseLayers = {
+//			"Grayscale": grayscale,
+//			"Satellite": satellite
+//		};
+//    
+//    var options = {
+//        position: 'bottomleft'
+//    };
+//    
+//    var overLays = {};
+//    
+//    L.control.layers(baseLayers, overLays, options).addTo(map);
+//    
+      
+// Perform control operations on L.Map object //WORKS
+     map.setZoom(14);
+
+
+
+//      console.log(basemap);
     
 //test setUrl // WORKS
 //var changetoSAT = basemap.setUrl('http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}');
@@ -114,7 +179,9 @@ cartodb.createVis('map', 'http://zenontc.cartodb.com/api/v2/viz/3dcc33be-62de-11
        
     
 //CREATE SELECTOR FOR TOGGLING BETWEEN BASEMAPS using CartoDB.js
-    
+// log basemap to push new tiles//WORKS  
+var basemap = layers[0];
+
     createSelector(map);
     
       function createSelector(layers) {
@@ -131,7 +198,6 @@ cartodb.createVis('map', 'http://zenontc.cartodb.com/api/v2/viz/3dcc33be-62de-11
 console.log("satellite layer selected");
 var changetoSat = basemap.setUrl('http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}');
               map.setZoom(14);
-
  selectedStyle = id;
           };
             
@@ -156,20 +222,5 @@ var changetoStreets = basemap.setUrl("https://a.tiles.mapbox.com/v3/zenontc.jgai
 
         
         </script>
-<!--
-    <script>
-   //  TESTING  // GOOOGLE GEOCODER PARAMETERS
-    
-    function getURLParameter(name) {
-       return decodeURI(
-       (RegExp(name + '=' + '(.+?)(&|$)').exec(location.search) || [, ])[1]);
-    }
-    
-    var regionParameter = getURLParameter('region');
-    var region = (regionParameter === 'undefined') ? '' : regionParameter;
-         
-        var map;
-        
-    </script>
--->
+
 </body>
