@@ -76,7 +76,7 @@
         <li id="sat" class="sat">Satellite</li>
     
       </ul>
-          <div id="geosearch"></div>
+          <!--<div id="geosearch"></div>-->
     </div>
     <script src="http://libs.cartocdn.com/cartodb.js/v3/3.11/cartodb.js"></script>
     <script>
@@ -113,7 +113,8 @@ cartodb.createVis('map', 'http://zenontc.cartodb.com/api/v2/viz/3dcc33be-62de-11
 //var basemap = layers[0];
 //    console.log(basemap);
     var map = vis.getNativeMap();
-    
+
+// GOECODER PARAMETERS   
        function getURLParameter(name) {
        return decodeURI(
        (RegExp(name + '=' + '(.+?)(&|$)').exec(location.search) || [, ])[1]);
@@ -123,7 +124,7 @@ cartodb.createVis('map', 'http://zenontc.cartodb.com/api/v2/viz/3dcc33be-62de-11
     var region = (regionParameter === 'undefined') ? '' : regionParameter;
     console.log(region);
     
-//    GEOCODER CONTROLS
+//    GEOCODER CONTROL
        new L.Control.GeoSearch({
            provider: new L.GeoSearch.Provider.Google({
                region: region
