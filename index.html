@@ -70,7 +70,6 @@
  
 <body>
     <div id="map"></div>  
-<!--
       <div id="layer_selector" class="cartodb-infobox">
       <ul>
         <li id="streets" class="streets">Streets</li>
@@ -79,7 +78,6 @@
       </ul>
           <div id="geosearch"></div>
     </div>
--->
     <script src="http://libs.cartocdn.com/cartodb.js/v3/3.11/cartodb.js"></script>
     <script>
 
@@ -125,20 +123,20 @@ var basemap = layers[0];
     
 // Leaflet BASEMAP LAYER SELECTOR /// does not push new tiles with createVis(), works with createLayer()
       
-var mbAttr = 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
-				'<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
-				'Imagery © <a href="http://mapbox.com">Mapbox</a>',
-      mbUrl = 'https://{s}.tiles.mapbox.com/v3/{id}/{z}/{x}/{y}.png';
+//var mbAttr = 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
+//				'<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
+//				'Imagery © <a href="http://mapbox.com">Mapbox</a>',
+//      mbUrl = 'https://{s}.tiles.mapbox.com/v3/{id}/{z}/{x}/{y}.png';
       
 // test setUrl with defined basemap layer
-//	    var satellite = basemap.setUrl('http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'),
-//        grayscale   = basemap.setUrl("https://a.tiles.mapbox.com/v3/zenontc.jgai4mkg/{z}/{x}/{y}.png");
+	    var satellite = basemap.setUrl('http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'),
+        grayscale   = basemap.setUrl("https://a.tiles.mapbox.com/v3/zenontc.jgai4mkg/{z}/{x}/{y}.png");
     
 // define various tile src
-    	    var grayscale   = L.tileLayer(mbUrl, {id: 'zenontc.jgai4mkg', attribution: mbAttr}),     
-  satellite = L.tileLayer('http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-	attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
-});
+//    	    var grayscale   = L.tileLayer(mbUrl, {id: 'zenontc.jgai4mkg', attribution: mbAttr}),     
+//  satellite = L.tileLayer('http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+//	attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+//});
 
     
     var baseLayers = {
@@ -150,13 +148,13 @@ var mbAttr = 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</
         position: 'bottomleft'
     };
     
-    var overLays = {};
+//    var overLays = {};
     
-    L.control.layers(baseLayers, overLays, options).addTo(map);
+//    L.control.layers(baseLayers, overLays, options).addTo(map);
     
       
 // Perform control operations on L.Map object //WORKS
-     map.setZoom(14);
+     map.setZoom(13);
 
 
 
@@ -169,37 +167,37 @@ var mbAttr = 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</
     
 //CREATE SELECTOR FOR TOGGLING BETWEEN BASEMAPS using CartoDB.js
 // log basemap to push new tiles//WORKS  
-//var basemap = layers[0];
-//selectedStyle = $('li.selected').attr('id');
+var basemap = layers[0];
+selectedStyle = $('li.selected').attr('id');
 
-//    createSelector(map);
+    createSelector(map);
     
-//      function createSelector(layers) {
-////        var sql = new cartodb.SQL({ user: 'zenontc' });
-//
-//        var $options = $('#layer_selector li');
-//        $options.click(function(e) {
-//          // get the area of the selected layer
-//          var $li = $(e.target);
-//          var id = $li.attr('id');
-//          if(id == 'sat' ){
-//            // change the basemap url in the layer[0] to toggle to sat img
-//            // MUST APPLY SELECTED STYLE TO "SATTELITE BUTTON", push style in click event?
-//console.log("satellite layer selected");
-//var changetoSat = basemap.setUrl('http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}');
-//              map.setZoom(14);
-// selectedStyle = id;
-//          };
-//            
-//            if(id == 'streets' ){
-//            // change the basemap url in the layer[0] to toggle back to mapbox 
-//console.log("streets layer selected");
-//var changetoStreets = basemap.setUrl("https://a.tiles.mapbox.com/v3/zenontc.jgai4mkg/{z}/{x}/{y}.png");
-//            selectedStyle = id;
-//          }
-//            
-//        });
-//      }
+      function createSelector(layers) {
+//        var sql = new cartodb.SQL({ user: 'zenontc' });
+
+        var $options = $('#layer_selector li');
+        $options.click(function(e) {
+          // get the area of the selected layer
+          var $li = $(e.target);
+          var id = $li.attr('id');
+          if(id == 'sat' ){
+            // change the basemap url in the layer[0] to toggle to sat img
+            // MUST APPLY SELECTED STYLE TO "SATTELITE BUTTON", push style in click event?
+console.log("satellite layer selected");
+var changetoSat = basemap.setUrl('http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}');
+              map.setZoom(14);
+ selectedStyle = id;
+          };
+            
+            if(id == 'streets' ){
+            // change the basemap url in the layer[0] to toggle back to mapbox 
+console.log("streets layer selected");
+var changetoStreets = basemap.setUrl("https://a.tiles.mapbox.com/v3/zenontc.jgai4mkg/{z}/{x}/{y}.png");
+            selectedStyle = id;
+          }
+            
+        });
+      }
       
   })
   .error(function (err) {
