@@ -166,6 +166,10 @@ L.Control.GeoSearch = L.Control.extend({
         }
     },
 // use fireEvent to change behaviour
+    
+    //http://stackoverflow.com/questions/14756420/emulate-click-on-leaflet-map-item
+    
+    //LEAFLET MAP EVENTS API http://leafletjs.com/reference.html#mouse-event
     _processResults: function(results) {
         if (results.length > 0) {
             this._map.fireEvent('geosearch_foundlocations', {Locations: results});
@@ -183,8 +187,12 @@ L.Control.GeoSearch = L.Control.extend({
                 this._positionMarker.setLatLng([location.Y, location.X]);
         }
 
-        this._map.setView([location.Y, location.X], this._config.zoomLevel, false);
+//        this._map.setView([location.Y, location.X], this._config.zoomLevel, false);
         this._map.fireEvent('geosearch_showlocation', {Location: location});
+//        this._map.fireEvent('click', [location.Y, location.X]);
+//        this._map.fireEvent('click', [location.X, location.Y]);
+        console.log([location.Y, location.X]);
+        console.log(location);
     },
 
     _printError: function(message) {
