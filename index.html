@@ -40,8 +40,15 @@
 
 
 window.onload = function initialize() {
+    
+    //this function triggers a click on CartoDB layer, with coordinates passed from geosearch
+    //NOTE: click will not trigger popup if it is not on layer (e.g. a road or outside of newark)
+    
+          function openInfowindow(layer, latlng, cartodb_id) {
+        layer.trigger('featureClick', null, latlng, null, { cartodb_id: cartodb_id }, 0);
+      };
+ 
         
-        var reference = new L.tileLayer('http://a.tiles.mapbox.com/v3/landplanner.map-50ghoxbt/{z}/{x}/{y}.png', {zIndex: 8});
 
 cartodb.createVis('map', 'http://nzlur.cartodb.com/api/v2/viz/00f582aa-824c-11e4-886f-0e018d66dc29/viz.json', {
 //    cartodb.createVis('map', 'http://nzlur.cartodb.com/api/v2/viz/00f582aa-824c-11e4-886f-0e018d66dc29/viz.json', {
@@ -63,9 +70,26 @@ var basemap = layers[0];
     console.log(basemap);
     var map = vis.getNativeMap();
     console.log(map);
-    map.addLayer(reference);
-    console.log(reference);
-//var reference = L.tileLayer('http://a.tiles.mapbox.com/v3/landplanner.map-50ghoxbt/{z}/{x}/{y}.png');
+     map.on("geosearch_showlocation", function(data) {
+//                console.log(data.Location.Y, data.Location.X);
+               var lat = (data.Location.Y);
+                var lng = (data.Location.X);
+                
+                function getCartdb_id(latlng) {
+         $.getJSON("http://nzlur.cartodb.com/api/v2/sql?q=SELECT%20cartodb_id%20FROM%20zoning%20where%20ST_intersects(the_geom,%20cdb_latlng("+lat+","+lng+"))", function(data) {
+  var items = data.rows[0];
+               
+                // Find the last index and the last item.
+                var cartodb_id = items.cartodb_id;
+             map.setView([lat, lng], 15, false);
+             openInfowindow(zoningmap, [lat, lng], cartodb_id);
+             //add more styling with coordinates, cdb_id
+             //setcartoCSS
+  });
+        };
+               getCartdb_id();
+          });
+
 
        new L.Control.GeoSearch({
            provider: new L.GeoSearch.Provider.Google({
@@ -149,7 +173,6 @@ var changetoStreets = basemap.setUrl("http://b.basemaps.cartocdn.com/light_all/{
             });
 
 }
-
 
 
         
