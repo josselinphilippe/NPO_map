@@ -53,4 +53,5 @@ margin-top: 14px;
       #layer_selector li.selected {
         background-color: #EEE;
       }
-      div.cartodb-popup div.cartodb-popup-content {max-height:none | inherit}
+      div.cartodb-popup div.cartodb-popup-content 
+      {max-height:none | inherit}
