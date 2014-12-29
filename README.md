@@ -1,7 +1,12 @@
 NPO_map
-=======
-
 Mapping Zoning/Planning Data for Newark/NJ
+=======
+12-28-2014 
+
+Final edits and project write-up in index.html file
+Final style edits in mapbox studio for basemap and reference layer
+Final style edits in cartodb editor to avoid redevelopment data obstruction
+
 
 12-06-2014 Updated tasks
 
