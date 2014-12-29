@@ -1,76 +1,78 @@
-<!DOCTYPE html>
 <head>
     <link rel="stylesheet" type="text/css" href="css/stylesheet.css">
-    
+<!--        <script src="http://libs.cartocdn.com/cartodb.js/v3/3.11/cartodb.js"></script>-->
+
     <link rel="stylesheet" href="http://libs.cartocdn.com/cartodb.js/v3/3.11/themes/css/cartodb.css" />
-    <!--[if lte IE 8]>
-    <link rel="stylesheet" href="http://libs.cartocdn.com/cartodb.js/v2/themes/css/cartodb.ie.css" />
-    <![endif]-->
+
     <link rel="stylesheet" href="css/l.geosearch.mod.css" />
-      <!--libraries kept to a minimum. Bootstrap could be used a la carte here, but I'm being lazy-->
-  <script src="http://libs.cartocdn.com/cartodb.js/v3/3.11/cartodb.js"></script>
-  <script src="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/js/bootstrap.min.js"></script>
-<!--  <script src="js/leaflet-hash.js"></script>-->
-<!--  <script src="js/l.geosearch.mod.js">  </script>-->
+<!--  <script src="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/js/bootstrap.min.js"></script>-->
+
+<!--
       <script src="js/l.control.geosearch.mod.js">  </script>
-
       <script src="js/l.geosearch.provider.google.js">  </script>
-
-   
-    
-    </head>
+-->
  
+
+    </head>
+
+
 <body>
-    <div id="map"></div>
-<!--    <div class="cartodb-zoom"></div>-->
-      <div id="layer_selector" class="cartodb-infobox">
+<div id="map"></div>
+    <div id="layer_selector" class="cartodb-infobox">
       <ul>
           
         <li id="streets" class="streets">Streets</li>
         <li id="sat" class="sat">Satellite</li>
     
       </ul>
-<!--          <div id="geosearch"></div>-->
+
     </div>
     
     <script src="http://libs.cartocdn.com/cartodb.js/v3/3.11/cartodb.js"></script>
-    <script>
+          <script src="js/l.control.geosearch.mod.js">  </script>
+      <script src="js/l.geosearch.provider.google.js">  </script>
+      <script src="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/js/bootstrap.min.js"></script>
 
+<script>
+// get the viz.json url from the CartoDB Editor
+// - click on visualize
+// - create new visualization
+// - make visualization public
+// - click on publish
+// - go to API tab
 
 window.onload = function initialize() {
-  
-    //this function triggers a click on CartoDB layer, with coordinates passed from geosearch
-    //NOTE: click will not trigger popup if it is not on layer (e.g. a road or outside of newark)
+
     
-          function openInfowindow(layer, latlng, cartodb_id) {
+         var reference = L.tileLayer('http://a.tiles.mapbox.com/v3/nzlur.33ed1f4a/{z}/{x}/{y}.png', {zIndex: 150});
+          
+    function openInfowindow(layer, latlng, cartodb_id) {
         layer.trigger('featureClick', null, latlng, null, { cartodb_id: cartodb_id }, 0);
       };
  
         
 
 cartodb.createVis('map', 'http://nzlur.cartodb.com/api/v2/viz/00f582aa-824c-11e4-886f-0e018d66dc29/viz.json', {
-//    cartodb.createVis('map', 'http://nzlur.cartodb.com/api/v2/viz/00f582aa-824c-11e4-886f-0e018d66dc29/viz.json', {
-
-//add CartoDB geocoder
-//        search: true,
-    
-//        shareable: true, 
+    scrollwheel: false,
         tiles_loader: true,
-    cartodb_logo: false
+    cartodb_logo: false,
+    zoom: 13
   })
   
   .done(function (vis, layers, layer) {
 //get native leaflet map for basemap selector tool//WORKS BUT CANNOT ADD LEAFLET LAYER CONTROLLER
 var basemap = layers[0];
     var zoningmap = layers[1];
+    var redev = layers[1].getSubLayer(2);
+    console.log(redev);
+//    redev.SetZIndex(4);
 //    zoningmap.layer.setZindex(4);
-    console.log(zoningmap);
-    console.log(basemap);
+//    console.log(zoningmap);
+//    console.log(basemap);
     var map = vis.getNativeMap();
-    
-//    map.addLayer(reference);
-//    console.log(reference);
-    
+//    console.log(map);
+    map.addLayer(reference);
+//map.setZoom(14);
      map.on("geosearch_showlocation", function(data) {
 //                console.log(data.Location.Y, data.Location.X);
                var lat = (data.Location.Y);
@@ -83,16 +85,16 @@ var basemap = layers[0];
                 // Find the last index and the last item.
                 var cartodb_id = items.cartodb_id;
              map.setView([lat, lng], 17, false);
-             openInfowindow(zoningmap, [lat, lng], cartodb_id);
+                                 openInfowindow(zoningmap, [lat, lng], cartodb_id);
+
              //add more styling with coordinates, cdb_id
              //setcartoCSS
   });
         };
                getCartdb_id();
           });
-
-
-       new L.Control.GeoSearch({
+    
+      new L.Control.GeoSearch({
            provider: new L.GeoSearch.Provider.Google({
 //               region: region
 //               componentRestrictions: {"administrativeArea":"NJ", "locality":"Newark"}
@@ -102,32 +104,7 @@ var basemap = layers[0];
            position: 'topcenter'
        }).addTo(map);
     
-    
-// Leaflet BASEMAP LAYER SELECTOR /// does not push new tiles with createVis(), works with createLayer()
-
-// test setUrl with defined basemap layer
-	    var satellite = basemap.setUrl('http://a.tiles.mapbox.com/v3/nzlur.a2826174/{z}/{x}/{y}.png'),
-//            http://a.tiles.mapbox.com/v3/landplanner.map-50ghoxbt/{z}/{x}/{y}.png
-        grayscale   = basemap.setUrl('http://a.tiles.mapbox.com/v3/nzlur.a2826174/{z}/{x}/{y}.png');
-
-
-    
-    var baseLayers = {
-			"Grayscale": grayscale,
-			"Satellite": satellite
-		};
-    
-    var options = {
-//        position: 'bottomleft'
-    };
-
-    
-       
-    
-//CREATE SELECTOR FOR TOGGLING BETWEEN BASEMAPS using CartoDB.js
-// log basemap to push new tiles//WORKS  
-var basemap = layers[0];
-selectedStyle = $('li.selected').attr('id');
+    selectedStyle = $('li.selected').attr('id');
 
     createSelector(map);
 
@@ -142,10 +119,14 @@ selectedStyle = $('li.selected').attr('id');
           var $li = $(e.target);
           var id = $li.attr('id');
           if(id == 'sat' ){
+//              access_token=pk.eyJ1IjoibnpsdXIiLCJhIjoiUFh0MzlIWSJ9.1mVHwMcRhliArgC-uE9S1w
             // change the basemap url in the layer[0] to toggle to sat img
             // MUST APPLY SELECTED STYLE TO "SATTELITE BUTTON", push style in click event?
 console.log("satellite layer selected");
-var changetoSat = basemap.setUrl('http://a.tiles.mapbox.com/v4/nzlur.kghco32a/{z}/{x}/{y}.png');
+var changetoSat = basemap.setUrl('http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}')
+//              , {
+//	attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+//});');
               
 //              map.setZoom(14);
  selectedStyle = id;
@@ -154,26 +135,15 @@ var changetoSat = basemap.setUrl('http://a.tiles.mapbox.com/v4/nzlur.kghco32a/{z
             if(id == 'streets' ){
             // change the basemap url in the layer[0] to toggle back to mapbox 
 console.log("streets layer selected");
-var changetoStreets = basemap.setUrl("http://a.tiles.mapbox.com/v4/nzlur.a2826174/{z}/{x}/{y}.png");
-    var addRef = map.addLayer(reference);
+var changetoStreets = basemap.setUrl("http://a.tiles.mapbox.com/v4/nzlur.kgh9n3dp/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibnpsdXIiLCJhIjoiUFh0MzlIWSJ9.1mVHwMcRhliArgC-uE9S1w");
+//    var addRef = map.addLayer(reference);
             selectedStyle = id;
           }
             
         });
       }
     
-//            map.addLayer(reference);
-//    console.log(reference);
-
-  })
-  .error(function (err) {
-                console.log(err);
-            });
-
+});
 }
-
-
-        
-        </script>
-
-</body>
+</script>
+    </body>
