@@ -1,99 +1,136 @@
 <!DOCTYPE html>
 <head>
-    <link rel="stylesheet" type="text/css" href="css/stylesheet.css">
-    
-    <link rel="stylesheet" href="http://libs.cartocdn.com/cartodb.js/v3/3.11/themes/css/cartodb.css" />
-    <!--[if lte IE 8]>
-    <link rel="stylesheet" href="http://libs.cartocdn.com/cartodb.js/v2/themes/css/cartodb.ie.css" />
-    <![endif]-->
-    <link rel="stylesheet" href="css/l.geosearch.mod.css" />
-      <!--libraries kept to a minimum. Bootstrap could be used a la carte here, but I'm being lazy-->
-  <script src="http://libs.cartocdn.com/cartodb.js/v3/3.11/cartodb.js"></script>
-  <script src="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/js/bootstrap.min.js"></script>
-<!--  <script src="js/leaflet-hash.js"></script>-->
-<!--  <script src="js/l.geosearch.mod.js">  </script>-->
-      <script src="js/l.control.geosearch.mod.js">  </script>
+<link rel="stylesheet" type="text/css" href="css/stylesheet.css">
+<link rel="stylesheet" href="http://libs.cartocdn.com/cartodb.js/v3/3.11/themes/css/cartodb.css" />
+<link rel="stylesheet" href="css/l.geosearch.mod.css" />
 
-      <script src="js/l.geosearch.provider.google.js">  </script>
+</head>
 
-<!--        <script src="js/bing.js"></script>-->
-<!--    <script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>-->
-   
-    
-    </head>
- 
 <body>
-    <div id="map"></div>
-<!--    <div class="cartodb-zoom"></div>-->
-      <div id="layer_selector" class="cartodb-infobox">
+
+<!--create map div and basemap toggle overlay-->
+<div id="map"></div>
+
+<!--edit, remove, or add basemap selector in list-->
+    <div id="layer_selector" class="cartodb-infobox">
       <ul>
           
         <li id="streets" class="streets">Streets</li>
         <li id="sat" class="sat">Satellite</li>
-    
       </ul>
-<!--          <div id="geosearch"></div>-->
+
     </div>
-    
+<!--run dependencies in this order. cartodb (includes leaflet) and leaflet geosearch plugin by Smeijer-->
+<!--https://github.com/smeijer/L.GeoSearch-->
     <script src="http://libs.cartocdn.com/cartodb.js/v3/3.11/cartodb.js"></script>
-    <script>
+          <script src="js/l.control.geosearch.mod.js">  </script>
+      <script src="js/l.geosearch.provider.google.js">  </script>
+      <script src="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/js/bootstrap.min.js"></script>
 
+<script>
 
+// run this packaged function upon loading window with iframe
 window.onload = function initialize() {
+
+//define a "reference layer" with only road and building laybels to lay on top of our map
+//created using Mapbox Studio for Mac. Radical map styling application for often necessary fixes when mapping this much data with cartodb (in this example, street labels in the cartodb editor basemap were often hidden behind our data at various zoom levels. Fixing this with a labels layer also allowed greater control of filtering said labels. The basemap used in the cartodb editor only has bodies of land and water styled. 
     
-    //this function triggers a click on CartoDB layer, with coordinates passed from geosearch
-    //NOTE: click will not trigger popup if it is not on layer (e.g. a road or outside of newark)
-    
-          function openInfowindow(layer, latlng, cartodb_id) {
+//in later edits, the reference layer came to include low-opacity road geometries. This was done mainly because of all major roads being tucked under our data (e.g the zoning data for EWR hid the New Jersey Turnpike)
+var reference = L.tileLayer('http://a.tiles.mapbox.com/v3/nzlur.33ed1f4a/{z}/{x}/{y}.png', {zIndex: 150});
+
+//define a function to trigger cartodb infowindow with geosearch results
+//this function requires the latlng coordinates of our geosearch results and the cartodb_id of the cartodb data to pop up
+function openInfowindow(layer, latlng, cartodb_id) {
         layer.trigger('featureClick', null, latlng, null, { cartodb_id: cartodb_id }, 0);
       };
  
-        
 
+// get the viz.json url from the CartoDB Editor
+       
+//createVis or createLayer
+//createVis was favored for this project to allow fuller control of the data in the editor and to avoid hardcoding added functionalities and overlays (e.g. the layer selector can be added, removed, or edited directly by the //client in the editor, avoiding the need for getSublayer() and the risks associated with layer re-ordering
 cartodb.createVis('map', 'http://nzlur.cartodb.com/api/v2/viz/00f582aa-824c-11e4-886f-0e018d66dc29/viz.json', {
-//    cartodb.createVis('map', 'http://nzlur.cartodb.com/api/v2/viz/00f582aa-824c-11e4-886f-0e018d66dc29/viz.json', {
-
-//add CartoDB geocoder
-//        search: true,
     
-//        shareable: true, 
-        tiles_loader: true,
-    cartodb_logo: false
+//set options for visualization
+    scrollwheel: false,
+    tiles_loader: true,
+    cartodb_logo: false,
+    zoom: 13
   })
-  
+
   .done(function (vis, layers, layer) {
-//get native leaflet map for basemap selector tool//WORKS BUT CANNOT ADD LEAFLET LAYER CONTROLLER
+    
+
+//get native leaflet map to add overlays and layers (createVis does not return a leaflet object)
+var map = vis.getNativeMap();
+    
+//this is the basemap added in the cartodb editor. By defining it here we can later change the url (and thus the basemap) in the toggle button
 var basemap = layers[0];
-    var zoningmap = layers[1];
-//    zoningmap.layer.setZindex(4);
-    console.log(zoningmap);
-    console.log(basemap);
-    var map = vis.getNativeMap();
-    console.log(map);
-     map.on("geosearch_showlocation", function(data) {
-//                console.log(data.Location.Y, data.Location.X);
+//console.log(basemap);
+
+//for development purposes the cartodb data was logged to test on-the-fly styling 4 sublayers in layers[1]
+var zoningmap = layers[1];
+//example of how to define a sublayer for further use (careful to monitor or not to change the order of layers in the editor)
+var redev = layers[1].getSubLayer(2);
+console.log(redev);
+
+//finally, we add the reference layer
+//the zIndex, or position of the layer, is set to 150 in our earlier code. This layer will remain on top unless that position is changed in the source code.
+map.addLayer(reference);
+
+//opening cartodb infowindows
+    
+//when the map is on, we are listening for the geosearch_showlocation event triggered by the geosearch (in other words, when the geosearch returns a new location, we want to know what the coordinates of that location are)
+map.on("geosearch_showlocation", function(data) {
+    
+//console.log(data.Location.Y, data.Location.X);
                var lat = (data.Location.Y);
                 var lng = (data.Location.X);
-                
-                function getCartdb_id(latlng) {
+
+//now that the location is known, we need the cartodb_id for our infowindow popup function to work
+function getCartdb_id(latlng) {
+//when the geosearch pans the map to the new location, we query our cartodb zoning table for the cartodb_id of the data at that location (in other words, when the marker falls we would like to know what polygon geometry it falls on, or intersects with
+//this requires postgis, which we we can use in our url sql query and which would look like this otherwise
+//                      
+//                  SELECT cartodb_id FROM zoning 
+//                  where ST_intersects(the_geom, cdb_latlng(lat,lng))
+
+//documentation for ST_Intersects: http://postgis.net/docs/ST_Intersects.html
+
          $.getJSON("http://nzlur.cartodb.com/api/v2/sql?q=SELECT%20cartodb_id%20FROM%20zoning%20where%20ST_intersects(the_geom,%20cdb_latlng("+lat+","+lng+"))", function(data) {
-  var items = data.rows[0];
+
+//the results of our query should return a single-row json, test with url query or in cartodb editor
+             
+// we assign a variable to all items in that row (columns in cartodb editor)
+ var items = data.rows[0];
                
-                // Find the last index and the last item.
-                var cartodb_id = items.cartodb_id;
-             map.setView([lat, lng], 15, false);
-             openInfowindow(zoningmap, [lat, lng], cartodb_id);
-             //add more styling with coordinates, cdb_id
-             //setcartoCSS
+// get that cartodb_id, man!
+var cartodb_id = items.cartodb_id;
+
+//pan the map to the coordinates of our geosearch result and zoom in to point
+map.setView([lat, lng], 17, false);
+
+//open the infowindow for the data found at that location, what up 920 broad street
+openInfowindow(zoningmap, [lat, lng], cartodb_id);
   });
         };
                getCartdb_id();
           });
-
-
-       new L.Control.GeoSearch({
+    
+//OVERLAYS
+    
+//add leaflet geosearch plugin here
+//documentation: 
+    
+//SMEIJER PLUGIN GIThttps://github.com/smeijer/L.GeoSearch
+//GOOGLE GEOCODING API https://developers.google.com/maps/documentation/geocoding/
+      new L.Control.GeoSearch({
            provider: new L.GeoSearch.Provider.Google({
-//               region: region
+               
+               //...The types[] array in the result indicates the address type. Examples of address types include a street address, a country, or a political entity. There is also a types[] array in the address_components[], indicating the type of each part of the address. Examples include street number or country. (Below is a full list of types.) Addresses may have multiple types. The types may be considered 'tags'. For example, many cities are tagged with the political and the locality type.//
+
+//we can thus restrict the geosearch to location results in the locality that is Newark (note: this could be trickier with a more commmon place name)
+
 //               componentRestrictions: {"administrativeArea":"NJ", "locality":"Newark"}
                componentRestrictions: {"locality":"Newark"}
 
@@ -101,81 +138,40 @@ var basemap = layers[0];
            position: 'topcenter'
        }).addTo(map);
     
-    
-// Leaflet BASEMAP LAYER SELECTOR /// does not push new tiles with createVis(), works with createLayer()
-      
-//var mbAttr = 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
-//				'<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
-//				'Imagery © <a href="http://mapbox.com">Mapbox</a>',
-//      mbUrl = 'https://{s}.tiles.mapbox.com/v3/{id}/{z}/{x}/{y}.png';
-      
-// test setUrl with defined basemap layer
-	    var satellite = basemap.setUrl('http://a.tiles.mapbox.com/v3/landplanner.map-50ghoxbt/{z}/{x}/{y}.png'),
-//            http://a.tiles.mapbox.com/v3/landplanner.map-50ghoxbt/{z}/{x}/{y}.png
-        grayscale   = basemap.setUrl("http://b.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png");
-//    "http://a.tiles.mapbox.com/v4/nzlur.kgh9n3dp/{z}/{x}/{y}.png
-// define various tile src http://b.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png
-//    	    var grayscale   = L.tileLayer(mbUrl, {id: 'zenontc.jgai4mkg', attribution: mbAttr}),     
-//  satellite = L.tileLayer('http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-//	attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
-//});
-
-    
-    var baseLayers = {
-			"Grayscale": grayscale,
-			"Satellite": satellite
-		};
-    
-    var options = {
-//        position: 'bottomleft'
-    };
-
-    
-       
-    
-//CREATE SELECTOR FOR TOGGLING BETWEEN BASEMAPS using CartoDB.js
-// log basemap to push new tiles//WORKS  
-var basemap = layers[0];
+//define behaviour for basemap selector
+//"selected style of basemap is chosen according to the id of the list items, namely satellite and streets"
 selectedStyle = $('li.selected').attr('id');
 
-    createSelector(map);
+//create and overlay the selector
+//hover styles and background images in css/stylesheet.css
+createSelector(map);
+
+
     
       function createSelector(layers) {
-//        var sql = new cartodb.SQL({ user: 'zenontc' });
-
         var $options = $('#layer_selector li');
         $options.click(function(e) {
-          // get the area of the selected layer
+// get the area of the selected layer
           var $li = $(e.target);
           var id = $li.attr('id');
           if(id == 'sat' ){
-            // change the basemap url in the layer[0] to toggle to sat img
+// change the basemap url in the layer[0] to toggle to sat img
             // MUST APPLY SELECTED STYLE TO "SATTELITE BUTTON", push style in click event?
 console.log("satellite layer selected");
-var changetoSat = basemap.setUrl('http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}');
-//              map.setZoom(14);
- selectedStyle = id;
-          };
-            
+var changetoSat = basemap.setUrl('http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}')
+selectedStyle = id;
+          };         
             if(id == 'streets' ){
-            // change the basemap url in the layer[0] to toggle back to mapbox 
+//change the basemap url in the layer[0] to toggle back to the basemap from cartodb editor
 console.log("streets layer selected");
-var changetoStreets = basemap.setUrl("http://b.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png");
-            selectedStyle = id;
+var changetoStreets = basemap.setUrl("http://a.tiles.mapbox.com/v4/nzlur.kgh9n3dp/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibnpsdXIiLCJhIjoiUFh0MzlIWSJ9.1mVHwMcRhliArgC-uE9S1w");
+selectedStyle = id;
           }
             
         });
       }
-
-  })
-  .error(function (err) {
-                console.log(err);
-            });
-
+    
+});
 }
-
-
-        
-        </script>
-
-</body>
+</script>
+    </body>
