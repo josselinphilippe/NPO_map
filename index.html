@@ -97,6 +97,8 @@ function getCartdb_id(latlng) {
 
 //documentation for ST_Intersects: http://postgis.net/docs/ST_Intersects.html
 
+//improve statement to find NEAREST data to lat + lng, this is to avoid  popups not opening when marker falls on street
+
          $.getJSON("http://nzlur.cartodb.com/api/v2/sql?q=SELECT%20cartodb_id%20FROM%20zoning%20where%20ST_intersects(the_geom,%20cdb_latlng("+lat+","+lng+"))", function(data) {
 
 //the results of our query should return a single-row json, test with url query or in cartodb editor
