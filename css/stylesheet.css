@@ -55,3 +55,6 @@ margin-top: 14px;
       }
       div.cartodb-popup div.cartodb-popup-content 
       {max-height:none | inherit}
+      
+      div.cartodb-infowindow{
+z-index: 1000;}
