@@ -180,12 +180,11 @@ id:item.cartodb_id
 $('#lots-searchfield').fadeTo('slow', 0.4);
 
 $( "#blocks-autocomplete" ).autocomplete({
-//position: { 
-//my: "right center",
-//at: "right+100% bottom"},
-highlightClass: "bold-text",
-source: blocksData,
-minLength:0,
+source: function(request, response) {
+    var results = $.ui.autocomplete.filter(blocksData, request.term);
+    response(results.slice(0,10));
+},
+minLength:1,
 select: function( event, ui ) {
 //log( ui.item ?
 //"Selected: " + ui.item.actual + " aka " + ui.item.id :
