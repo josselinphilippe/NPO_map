@@ -163,7 +163,7 @@ position: 'topleft'
 
 
 
-$.getJSON("http://zenontc.cartodb.com/api/v2/sql?q=SELECT DISTINCT ON (blockno) cartodb_id, blockno FROM public.newarkzoning", function(data){
+$.getJSON("http://zenontc.cartodb.com/api/v2/sql?q=SELECT DISTINCT ON (blockno) cartodb_id, blockno FROM public.newarkzoning where blockno != 0", function(data){
 blocksData = $.map(data.rows, function(item) {
 
 return {
