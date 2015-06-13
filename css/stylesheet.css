@@ -217,3 +217,5 @@ font-size: 20px;
 transition: all 0.2s linear;
 margin-left: 10px;
     }
+
+.ui-autocomplete { max-height: 200px; overflow-y: scroll; overflow-x: hidden;}
